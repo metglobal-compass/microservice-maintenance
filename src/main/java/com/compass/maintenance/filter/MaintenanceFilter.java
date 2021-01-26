@@ -1,5 +1,6 @@
 package com.compass.maintenance.filter;
 
+import com.compass.maintenance.exception.MaintenanceException;
 import com.compass.maintenance.service.MaintenanceService;
 import java.io.IOException;
 import java.util.Base64;
@@ -50,7 +51,7 @@ public class MaintenanceFilter implements Filter {
     String path = httpServletRequest.getServletPath();
 
     if (path.startsWith("/maintenance") && !isAuthorized) {
-      throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Wrong maintenance token");
+      throw new MaintenanceException();
     }
 
     if (isMaintenance && !path.equals("/maintenance/unlock")) {
