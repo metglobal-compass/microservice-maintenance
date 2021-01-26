@@ -1,8 +1,8 @@
 package com.compass.maintenance.controller;
 
+import com.compass.maintenance.model.MaintenanceResponse;
 import com.compass.maintenance.service.MaintenanceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,16 +19,16 @@ public class MaintenanceController {
   }
 
   @PatchMapping("/lock")
-  public String lockAction() {
-    service.lock();
+  public MaintenanceResponse lockAction() {
+    service.setMaintenanceMode(true);
 
-    return "on";
+    return new MaintenanceResponse().setMaintenance(true);
   }
 
   @PatchMapping("/unlock")
-  public String unlockAction() {
-    service.unlock();
+  public MaintenanceResponse unlockAction() {
+    service.setMaintenanceMode(false);
 
-    return "off";
+    return new MaintenanceResponse().setMaintenance(false);
   }
 }

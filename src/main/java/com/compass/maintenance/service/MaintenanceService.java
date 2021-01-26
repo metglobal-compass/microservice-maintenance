@@ -18,17 +18,13 @@ public class MaintenanceService {
     this.redisTemplate = redisTemplate;
   }
 
-  public void lock() {
-    redisTemplate.opsForValue().set(projectName + ":maintenance", "true");
-  }
-
-  public void unlock() {
-    redisTemplate.opsForValue().set(projectName + ":maintenance", "false");
+  public void setMaintenanceMode(Boolean maintenanceMode) {
+    redisTemplate.opsForValue().set(projectName + ":maintenance", maintenanceMode.toString());
   }
 
   public boolean checkMaintenanceMode() {
     String isMaintenance = redisTemplate.opsForValue().get(projectName + ":maintenance");
 
-    return Boolean.parseBoolean(isMaintenance);
+    return Boolean.parseBoolean(isMaintenance); // If string isn't "true", it always returns false.
   }
 }
