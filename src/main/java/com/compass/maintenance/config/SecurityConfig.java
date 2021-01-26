@@ -1,6 +1,6 @@
 package com.compass.maintenance.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,11 +11,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-  @Value("${maintenance.username}")
-  private String maintenanceUser;
+  private final CustomAuthProvider authProvider;
 
-  @Value("{noop}${maintenance.password}")
-  private String maintenancePassword;
+  @Autowired
+  public SecurityConfig(CustomAuthProvider authProvider) {
+    this.authProvider = authProvider;
+  }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -30,9 +31,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   public void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.inMemoryAuthentication()
-        .withUser(maintenanceUser)
-        .password(maintenancePassword)
-        .roles("ADMIN");
+    auth.authenticationProvider(authProvider);
   }
 }
