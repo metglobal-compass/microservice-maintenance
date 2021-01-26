@@ -2,6 +2,9 @@ package com.compass.maintenance.filter;
 
 import com.compass.maintenance.service.MaintenanceService;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Base64;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -18,10 +21,11 @@ import org.springframework.web.client.HttpClientErrorException;
 @Component
 public class MaintenanceFilter implements Filter {
 
-  @Value("${maintenance.token}")
-  private String token;
+  @Value("${maintenance.username}")
+  private String username;
 
-  private final String HEADER_KEY = "X-Maintenance-Token";
+  @Value("${maintenance.password}")
+  private String password;
 
   private final MaintenanceService service;
 
@@ -42,16 +46,17 @@ public class MaintenanceFilter implements Filter {
 
     HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
-    String headerToken = httpServletRequest.getHeader(HEADER_KEY);
+    String authKey = httpServletRequest.getHeader("Authorization");
+    String[] credentials = this.getCredentialsFromBasicAuthHeader(authKey);
 
     String path = httpServletRequest.getServletPath();
 
-    if (path.startsWith("/maintenance") && !headerToken.equals(token)) {
+    if (path.startsWith("/maintenance") && !this.authorize(credentials)) {
       throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Wrong maintenance token");
     }
 
     if (isMaintenance && !path.equals("/maintenance/unlock")) {
-      throw new RuntimeException("Server is in maintenance mode. Please try again.");
+      throw new RuntimeException("Server is under maintenance.");
     } else {
       filterChain.doFilter(request, response);
     }
@@ -61,5 +66,17 @@ public class MaintenanceFilter implements Filter {
   @Override
   public void destroy() {
 
+  }
+
+  private String[] getCredentialsFromBasicAuthHeader(String rawHeader) {
+    String lastWord = rawHeader.split(" ")[1];
+
+    String decodedCredentials = new String(Base64.getDecoder().decode(lastWord));
+
+    return decodedCredentials.split(":");
+  }
+
+  private boolean authorize(String[] credentials) {
+    return username.equals(credentials[0]) && password.equals(credentials[1]);
   }
 }
