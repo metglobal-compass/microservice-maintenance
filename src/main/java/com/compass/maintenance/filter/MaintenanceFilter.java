@@ -45,11 +45,11 @@ public class MaintenanceFilter implements Filter {
     HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
     String authKey = httpServletRequest.getHeader("Authorization");
-    String[] credentials = this.getCredentialsFromBasicAuthHeader(authKey);
+    boolean isAuthorized = this.authorize(authKey);
 
     String path = httpServletRequest.getServletPath();
 
-    if (path.startsWith("/maintenance") && !this.authorize(credentials)) {
+    if (path.startsWith("/maintenance") && !isAuthorized) {
       throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Wrong maintenance token");
     }
 
@@ -66,15 +66,21 @@ public class MaintenanceFilter implements Filter {
 
   }
 
+  private boolean authorize(String authKey) {
+    if (authKey == null) {
+      return false;
+    }
+
+    String[] credentials = this.getCredentialsFromBasicAuthHeader(authKey);
+
+    return username.equals(credentials[0]) && password.equals(credentials[1]);
+  }
+
   private String[] getCredentialsFromBasicAuthHeader(String rawHeader) {
     String lastWord = rawHeader.split(" ")[1];
 
     String decodedCredentials = new String(Base64.getDecoder().decode(lastWord));
 
     return decodedCredentials.split(":");
-  }
-
-  private boolean authorize(String[] credentials) {
-    return username.equals(credentials[0]) && password.equals(credentials[1]);
   }
 }
