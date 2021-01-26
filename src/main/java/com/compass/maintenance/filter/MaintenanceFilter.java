@@ -2,8 +2,6 @@ package com.compass.maintenance.filter;
 
 import com.compass.maintenance.service.MaintenanceService;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
