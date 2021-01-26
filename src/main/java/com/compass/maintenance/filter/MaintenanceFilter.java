@@ -40,7 +40,7 @@ public class MaintenanceFilter implements Filter {
       filterChain.doFilter(request, response);
     }
 
-    SecurityContextHolder.getContext().setAuthentication(null);
+    SecurityContextHolder.getContext().setAuthentication(null); // Clear auth info every request
   }
 
   @Override
