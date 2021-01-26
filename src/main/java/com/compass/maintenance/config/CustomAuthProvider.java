@@ -2,6 +2,7 @@ package com.compass.maintenance.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
@@ -17,9 +18,14 @@ public class CustomAuthProvider implements AuthenticationProvider {
 
   @Override
   public Authentication authenticate(Authentication auth) throws AuthenticationException {
-    Object principal = auth.getPrincipal();
+    String username = (String) auth.getPrincipal();
+    String password = (String) auth.getCredentials();
 
-    return auth;
+    if (username.equals(maintenanceUser) && password.equals(maintenancePassword)) {
+      return auth;
+    } else {
+      throw new BadCredentialsException("Username or password is wrong");
+    }
   }
 
   @Override
