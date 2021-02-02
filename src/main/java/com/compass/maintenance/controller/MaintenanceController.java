@@ -48,6 +48,6 @@ public class MaintenanceController {
       message = ex.getMessage();
     }
 
-    return new MaintenanceResponse().setSuccess(success).setMessage(UNLOCK_MESSAGE);
+    return new MaintenanceResponse().setSuccess(success).setMessage(message);
   }
 }

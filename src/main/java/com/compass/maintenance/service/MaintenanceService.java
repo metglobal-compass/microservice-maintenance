@@ -1,5 +1,6 @@
 package com.compass.maintenance.service;
 
+import com.compass.maintenance.exception.MaintenanceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MaintenanceService {
+
+  private static final String SERVER_ALREADY_ONLINE_MESSAGE = "Server is already online.";
 
   @Value("${maintenance.project}")
   private String projectName;
@@ -18,8 +21,14 @@ public class MaintenanceService {
     this.redisTemplate = redisTemplate;
   }
 
-  public void setMaintenanceMode(Boolean maintenanceMode) {
-    redisTemplate.opsForValue().set(projectName + ":maintenance", maintenanceMode.toString());
+  public void setMaintenanceMode(boolean maintenanceMode) {
+    boolean isMaintenance = this.checkMaintenanceMode();
+
+    if ((maintenanceMode == isMaintenance) && !maintenanceMode) {
+      throw new MaintenanceException(SERVER_ALREADY_ONLINE_MESSAGE);
+    }
+
+    redisTemplate.opsForValue().set(projectName + ":maintenance", Boolean.toString(maintenanceMode));
   }
 
   public boolean checkMaintenanceMode() {
