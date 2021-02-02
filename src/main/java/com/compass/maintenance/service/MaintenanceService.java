@@ -1,6 +1,11 @@
 package com.compass.maintenance.service;
 
 import com.compass.maintenance.exception.MaintenanceException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -12,8 +17,14 @@ public class MaintenanceService {
   private static final String SERVER_ALREADY_LOCKED_MESSAGE = "Server is already locked.";
   private static final String SERVER_ALREADY_ONLINE_MESSAGE = "Server is already online.";
 
+  private static final String KEY_TO_STORE = ":maintenance.expires";
+  private static final String RFC_7231_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
+
   @Value("${maintenance.project}")
   private String projectName;
+
+  @Value("${maintenance.ttl:3600}")
+  private Integer ttl;
 
   private final StringRedisTemplate redisTemplate;
 
@@ -31,12 +42,26 @@ public class MaintenanceService {
       );
     }
 
-    redisTemplate.opsForValue().set(projectName + ":maintenance", Boolean.toString(maintenanceMode));
+    if (maintenanceMode) {
+      long expireSeconds = ZonedDateTime.now(ZoneId.of("GMT")).toEpochSecond() + ttl;
+
+      Instant instant = Instant.ofEpochSecond(expireSeconds + ttl);
+      String expireDateTimeGMT = ZonedDateTime
+          .ofInstant(instant, ZoneId.of("GMT"))
+          .format(DateTimeFormatter.ofPattern(RFC_7231_DATE_FORMAT));
+
+      // TODO: Try opsForHash.
+      redisTemplate.opsForValue().set(projectName + KEY_TO_STORE, expireDateTimeGMT);
+
+      redisTemplate.expire(projectName + KEY_TO_STORE, ttl, TimeUnit.SECONDS);
+    } else {
+      redisTemplate.delete(projectName + KEY_TO_STORE);
+    }
   }
 
   public boolean checkMaintenanceMode() {
-    String isMaintenance = redisTemplate.opsForValue().get(projectName + ":maintenance");
+    String expireDateTime = redisTemplate.opsForValue().get(projectName + KEY_TO_STORE);
 
-    return Boolean.parseBoolean(isMaintenance); // If string isn't "true", it always returns false.
+    return expireDateTime != null;
   }
 }

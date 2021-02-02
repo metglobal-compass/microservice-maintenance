@@ -9,11 +9,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
@@ -40,7 +40,9 @@ public class MaintenanceFilter implements Filter {
     String path = ((HttpServletRequest) request).getServletPath();
 
     if (isMaintenance && !path.startsWith("/maintenance")) {
-      throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, LOCK_MESSAGE);
+      HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+
+      httpServletResponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, LOCK_MESSAGE);
     } else {
       filterChain.doFilter(request, response);
     }
