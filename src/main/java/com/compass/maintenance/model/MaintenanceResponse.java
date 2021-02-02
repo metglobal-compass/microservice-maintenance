@@ -3,7 +3,7 @@ package com.compass.maintenance.model;
 public class MaintenanceResponse {
 
   private boolean success;
-  private boolean isMaintenance;
+  private String message;
 
   public boolean isSuccess() {
     return success;
@@ -15,12 +15,12 @@ public class MaintenanceResponse {
     return this;
   }
 
-  public boolean isMaintenance() {
-    return isMaintenance;
+  public String getMessage() {
+    return message;
   }
 
-  public MaintenanceResponse setMaintenance(boolean maintenance) {
-    this.isMaintenance = maintenance;
+  public MaintenanceResponse setMessage(String message) {
+    this.message = message;
 
     return this;
   }
