@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MaintenanceService {
 
+  private static final String SERVER_ALREADY_LOCKED_MESSAGE = "Server is already locked.";
   private static final String SERVER_ALREADY_ONLINE_MESSAGE = "Server is already online.";
 
   @Value("${maintenance.project}")
@@ -24,8 +25,10 @@ public class MaintenanceService {
   public void setMaintenanceMode(boolean maintenanceMode) {
     boolean isMaintenance = this.checkMaintenanceMode();
 
-    if ((maintenanceMode == isMaintenance) && !maintenanceMode) {
-      throw new MaintenanceException(SERVER_ALREADY_ONLINE_MESSAGE);
+    if (maintenanceMode == isMaintenance) {
+      throw new MaintenanceException(
+          maintenanceMode ? SERVER_ALREADY_LOCKED_MESSAGE : SERVER_ALREADY_ONLINE_MESSAGE
+      );
     }
 
     redisTemplate.opsForValue().set(projectName + ":maintenance", Boolean.toString(maintenanceMode));

@@ -10,11 +10,16 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class MaintenanceFilter implements Filter {
+
+  private static final String LOCK_MESSAGE = "Server is under maintenance.";
 
   private final MaintenanceService service;
 
@@ -34,8 +39,8 @@ public class MaintenanceFilter implements Filter {
     boolean isMaintenance = service.checkMaintenanceMode();
     String path = ((HttpServletRequest) request).getServletPath();
 
-    if (isMaintenance && !path.equals("/maintenance/unlock")) {
-      throw new RuntimeException("Server is under maintenance.");
+    if (isMaintenance && !path.startsWith("/maintenance")) {
+      throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, LOCK_MESSAGE);
     } else {
       filterChain.doFilter(request, response);
     }
