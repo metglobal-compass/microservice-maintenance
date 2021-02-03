@@ -34,7 +34,7 @@ public class MaintenanceService {
   }
 
   public void setMaintenanceMode(boolean maintenanceMode) {
-    boolean isMaintenance = this.checkMaintenanceMode();
+    boolean isMaintenance = this.getExpireDateTime() != null;
 
     if (maintenanceMode == isMaintenance) {
       throw new MaintenanceException(
@@ -59,9 +59,7 @@ public class MaintenanceService {
     }
   }
 
-  public boolean checkMaintenanceMode() {
-    String expireDateTime = redisTemplate.opsForValue().get(projectName + KEY_TO_STORE);
-
-    return expireDateTime != null;
+  public String getExpireDateTime() {
+    return redisTemplate.opsForValue().get(projectName + KEY_TO_STORE);
   }
 }

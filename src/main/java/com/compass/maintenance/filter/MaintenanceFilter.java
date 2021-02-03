@@ -36,12 +36,13 @@ public class MaintenanceFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
-    boolean isMaintenance = service.checkMaintenanceMode();
+    String expireDateTime = service.getExpireDateTime();
     String path = ((HttpServletRequest) request).getServletPath();
 
-    if (isMaintenance && !path.startsWith("/maintenance")) {
+    if (expireDateTime != null && !path.startsWith("/maintenance")) {
       HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
+      httpServletResponse.addHeader("Retry-After", expireDateTime);
       httpServletResponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, LOCK_MESSAGE);
     } else {
       filterChain.doFilter(request, response);
