@@ -40,6 +40,9 @@ maintenance.password=123
 # Redis host and port (optional, these are default values)
 maintenance.host=localhost
 maintenance.port=6379
+
+# Redis ttl (optional)
+maintenance.ttl=3600 (this is default)
 ```
 
 Used routes (Basic Authorization should be used) (without body):
@@ -54,6 +57,10 @@ If request is successful, we should get this response (e.g. if maintenance becam
 ```
 {
    "success": true,
-   "maintenance": false
+   "message": "Server is under maintenance."
 }
 ```
+
+After locking the application, if we send a usual request, it will throw
+a 503 Service unavailable error with message `Server is under maintenance.` until we
+unlock it again.
