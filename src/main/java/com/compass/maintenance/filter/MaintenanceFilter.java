@@ -48,6 +48,10 @@ public class MaintenanceFilter implements Filter {
     } else {
       filterChain.doFilter(request, response);
     }
+
+    if (path.startsWith("/maintenance")) {
+      SecurityContextHolder.getContext().setAuthentication(null);
+    }
   }
 
   @Override
