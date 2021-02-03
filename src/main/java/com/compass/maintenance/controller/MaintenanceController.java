@@ -1,6 +1,7 @@
 package com.compass.maintenance.controller;
 
 import com.compass.maintenance.model.MaintenanceResponse;
+import com.compass.maintenance.params.MaintenanceParams;
 import com.compass.maintenance.service.MaintenanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -10,9 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/maintenance")
 public class MaintenanceController {
-
-  private static final String LOCK_MESSAGE = "Server is under maintenance.";
-  private static final String UNLOCK_MESSAGE = "Server is online.";
 
   private final MaintenanceService service;
 
@@ -24,7 +22,7 @@ public class MaintenanceController {
   @PatchMapping("/lock")
   public MaintenanceResponse lockAction() {
     boolean success = true;
-    String message = LOCK_MESSAGE;
+    String message = MaintenanceParams.LOCK_MESSAGE.getMessage();
 
     try {
       service.setMaintenanceMode(true);
@@ -39,7 +37,7 @@ public class MaintenanceController {
   @PatchMapping("/unlock")
   public MaintenanceResponse unlockAction() {
     boolean success = true;
-    String message = UNLOCK_MESSAGE;
+    String message = MaintenanceParams.UNLOCK_MESSAGE.getMessage();
 
     try {
       service.setMaintenanceMode(false);

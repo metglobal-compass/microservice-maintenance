@@ -1,6 +1,7 @@
 package com.compass.maintenance.service;
 
 import com.compass.maintenance.exception.MaintenanceException;
+import com.compass.maintenance.params.MaintenanceParams;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -13,9 +14,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MaintenanceService {
-
-  private static final String SERVER_ALREADY_LOCKED_MESSAGE = "Server is already locked.";
-  private static final String SERVER_ALREADY_ONLINE_MESSAGE = "Server is already online.";
 
   private static final String KEY_TO_STORE = ":maintenance.expires";
   private static final String RFC_7231_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
@@ -38,7 +36,9 @@ public class MaintenanceService {
 
     if (maintenanceMode == isMaintenance) {
       throw new MaintenanceException(
-          maintenanceMode ? SERVER_ALREADY_LOCKED_MESSAGE : SERVER_ALREADY_ONLINE_MESSAGE
+          maintenanceMode
+              ? MaintenanceParams.SERVER_ALREADY_LOCKED_MESSAGE.getMessage()
+              : MaintenanceParams.SERVER_ALREADY_ONLINE_MESSAGE.getMessage()
       );
     }
 

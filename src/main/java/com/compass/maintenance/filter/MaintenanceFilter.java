@@ -1,5 +1,6 @@
 package com.compass.maintenance.filter;
 
+import com.compass.maintenance.params.MaintenanceParams;
 import com.compass.maintenance.service.MaintenanceService;
 import java.io.IOException;
 import javax.servlet.Filter;
@@ -11,15 +12,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
 @Component
 public class MaintenanceFilter implements Filter {
-
-  private static final String LOCK_MESSAGE = "Server is under maintenance.";
 
   private final MaintenanceService service;
 
@@ -42,8 +40,11 @@ public class MaintenanceFilter implements Filter {
     if (expireDateTime != null && !path.startsWith("/maintenance")) {
       HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-      httpServletResponse.addHeader("Retry-After", expireDateTime);
-      httpServletResponse.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, LOCK_MESSAGE);
+      httpServletResponse.addHeader(HttpHeaders.RETRY_AFTER, expireDateTime);
+      httpServletResponse.sendError(
+          HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+          MaintenanceParams.LOCK_MESSAGE.getMessage()
+      );
     } else {
       filterChain.doFilter(request, response);
     }
