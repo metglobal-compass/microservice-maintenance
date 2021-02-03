@@ -43,15 +43,7 @@ public class MaintenanceService {
     }
 
     if (maintenanceMode) {
-      long expireSeconds = ZonedDateTime.now(ZoneId.of("GMT")).toEpochSecond() + ttl;
-
-      Instant instant = Instant.ofEpochSecond(expireSeconds + ttl);
-      String expireDateTimeGMT = ZonedDateTime
-          .ofInstant(instant, ZoneId.of("GMT"))
-          .format(DateTimeFormatter.ofPattern(RFC_7231_DATE_FORMAT));
-
-      // TODO: Try opsForHash.
-      redisTemplate.opsForValue().set(projectName + KEY_TO_STORE, expireDateTimeGMT);
+      redisTemplate.opsForValue().set(projectName + KEY_TO_STORE, this.getExpireByTtl(ttl));
 
       redisTemplate.expire(projectName + KEY_TO_STORE, ttl, TimeUnit.SECONDS);
     } else {
@@ -61,5 +53,13 @@ public class MaintenanceService {
 
   public String getExpireDateTime() {
     return redisTemplate.opsForValue().get(projectName + KEY_TO_STORE);
+  }
+
+  private String getExpireByTtl(int ttl) {
+    long seconds = ZonedDateTime.now(ZoneId.of("GMT")).toEpochSecond();
+
+    return ZonedDateTime
+        .ofInstant(Instant.ofEpochSecond(seconds + ttl), ZoneId.of("GMT"))
+        .format(DateTimeFormatter.ofPattern(RFC_7231_DATE_FORMAT));
   }
 }
