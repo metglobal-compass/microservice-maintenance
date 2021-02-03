@@ -48,8 +48,6 @@ public class MaintenanceFilter implements Filter {
     } else {
       filterChain.doFilter(request, response);
     }
-
-    SecurityContextHolder.getContext().setAuthentication(null);
   }
 
   @Override
